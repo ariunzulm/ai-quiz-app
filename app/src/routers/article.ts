@@ -5,6 +5,7 @@ export async function POST(req: NextRequest) {
   const { title } = await req.json();
 
   const text = await articleGenerate(title);
+
   const response = await fetch("http://localhost:3000/api/articles", {
     method: "POST",
     headers: {
@@ -13,14 +14,8 @@ export async function POST(req: NextRequest) {
     body: JSON.stringify(title),
   });
   const data = await response.json();
-  return NextResponse.json({ success: true }, data);
+  return NextResponse.json({ success: true, ...data });
 }
-
-
-
-
-
-
 
 export async function GET(req: NextRequest) {
   const body = await req.json();
