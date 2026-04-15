@@ -7,24 +7,24 @@ datasource db {
   provider = "postgresql"
 }
 
-model Article { 
-  id    String     @id @default(cuid()) 
-  title String  
-  content  String?
-  summary String
-  userId String
-  // user User @relation(fields: [userId])
+model Article {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  summary   String
+  userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  quizzes Quiz[] 
-} 
-model Quiz { 
-  id        Int     @id @default(autoincrement()) 
-  question     String
-  options  String[]
-  answer String
+  quizzes   Quiz[]
+}
+
+model Quiz {
+  id        Int      @id @default(autoincrement())
+  question  String
+  options   String[]
+  answer    String
   articleId String
-  article Article @relation(fields: [articleId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-} 
+  article   Article  @relation(fields: [articleId], references: [id])
+}

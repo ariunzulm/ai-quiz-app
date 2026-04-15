@@ -9,16 +9,23 @@ import {
   RotateCw,
   Sparkles,
 } from "lucide-react";
+type Quiz = {
+  question: string;
+  options: string[];
+  answer: string;
+};
 
-export const ArticleGenerator = () => {
+export const QuizGenerator = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  
   const onGenerateQuiz = async () => {
     if (!title && !content) return;
     setLoading(true);
-    await fetch("/api/article", {
+
+    const res = await fetch("/api/article", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -28,6 +35,8 @@ export const ArticleGenerator = () => {
         content,
       }),
     });
+    const data = await res.json();
+    setQuizzes(data.messge ?? []);
 
     setLoading(false);
   };
@@ -35,7 +44,7 @@ export const ArticleGenerator = () => {
   const onReset = () => {
     setTitle("");
     setContent("");
-
+    setQuizzes([]);
     setLoading(false);
   };
 
@@ -110,6 +119,16 @@ export const ArticleGenerator = () => {
           </>
         )}
       </Button>
+      {quizzes.length > 0 && (
+        <div>
+          <div className="flex flex-col gap-4 mt-2">
+            <h2 className="text-sm font-medium">Quiz Questions</h2>
+          </div>
+          {quizzes.map((quiz, i) => (
+            <div key={i}>{quiz.options}</div>
+          ))}
+        </div>
+      )}
     </Card>
   );
 };

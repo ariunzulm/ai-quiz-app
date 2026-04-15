@@ -33,3 +33,4 @@ export async function GET(request:NextRequest){
     const article:Article=await request.json()
    return NextResponse.json({message:""})
 }
+//ehleed content, title avna - summarize hiigeed, summarized contentiig quiz bolgono 

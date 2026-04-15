@@ -2,31 +2,55 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BookOpenCheck, Loader2, RotateCw, Sparkles } from "lucide-react";
+import {
+  BookOpen,
+  BookOpenCheck,
+  FileTextIcon,
+  Loader2,
+  RotateCw,
+  Sparkles,
+} from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 
 export const SummarizeContent = () => {
+  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [summary, setSummary] = useState<{ summary: string } | null>(null);
+  const { userId } = useAuth();
 
-  const onGenerateContent = async () => {
-    if (!content) return;
+  const isDisabled = loading || !title || !content;
+
+  const onGenerateSummary = async () => {
+    if (!title || !content) return;
     setLoading(true);
-    await fetch("/api/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        content,
-      }),
-    });
 
-    setLoading(false);
+    try {
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          content,
+          userId,
+        }),
+      });
+      if (!response) throw new Error("Failed to generate summary");
+      console.log(response, "response");
+      const data = await response.json();
+      setSummary(data);
+
+      setLoading(false);
+    } catch (error) {
+      console.log("Something went wrong during summary generation.", error);
+    }
   };
-
   const onReset = () => {
     setContent("");
-
+    setTitle("");
+    setSummary(null);
     setLoading(false);
   };
 
@@ -47,42 +71,87 @@ export const SummarizeContent = () => {
       </div>
 
       <p className="text-sm text-muted-foreground leading-relaxed">
-        Summarized content
+        Paste your article content below to generate a summary and quiz
+        questions. Your articles will be saved in the sidebar for future
+        reference.
       </p>
-
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2 text-sm font-medium">
-          <BookOpenCheck size={16} className="text-muted-foreground" />
-          Article Content
+          <FileTextIcon size={16} className="text-muted-foreground" />
+          Article Title
         </div>
-        <textarea
-          id="content"
-          rows={7}
-          className="w-full text-sm border border-zinc-200 rounded-md px-3 py-2 bg-zinc-50 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 transition-colors resize-y"
-          placeholder="Paste your article content here..."
-          value={content}
+        <input
+          id="title"
+          type="text"
+          className="w-full text-sm border border-zinc-200 rounded-md px-3 py-2 bg-zinc-50 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 transition-colors"
+          placeholder="Enter a title for your article..."
+          value={title}
           disabled={loading}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => setTitle(e.target.value)}
         />
       </div>
+      {!summary && (
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <BookOpenCheck size={16} className="text-muted-foreground" />
+            Article Content
+          </label>
+          <textarea
+            id="content"
+            rows={7}
+            className="w-full text-sm border border-zinc-200 rounded-md px-3 py-2 bg-zinc-50 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 transition-colors resize-y"
+            placeholder="Paste your article content here..."
+            value={content}
+            disabled={loading}
+            onChange={(e) => setContent(e.target.value)}
+          />
+          <Button
+            onClick={onGenerateSummary}
+            disabled={isDisabled}
+            className="w-full cursor-pointer"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles size={16} className="cursor-pointer" />
+                Generate summary
+              </>
+            )}
+          </Button>
+        </div>
+      )}
 
-      <Button
-        onClick={onGenerateContent}
-        disabled={loading || !content}
-        className="w-full cursor-pointer"
-      >
-        {loading ? (
-          <>
-            <Loader2 size={16} className="animate-spin" />
-            Generating...
-          </>
-        ) : (
-          <>
-            <Sparkles size={16} className="cursor-pointer" />
-            Take a quiz
-          </>
-        )}
-      </Button>
+      {summary && !loading && (
+        <div className="flex gap-2 flex-col">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <BookOpenCheck size={16} className="text-muted-foreground" />
+              Summary
+            </div>
+            <div className="w-full text-sm border border-zinc-200 rounded-md px-3 py-2 bg-zinc-50 text-foreground leading-relaxed whitespace-pre-wrap">
+              {summary.summary}
+            </div>
+          </div>
+          <div className="flex justify-between gap-2">
+            <Button
+              onClick={onGenerateSummary}
+              disabled={isDisabled}
+              className="w-fit cursor-pointer"
+            >
+              <Sparkles size={16} className="cursor-pointer" />
+              See summary
+            </Button>
+            <Button disabled={isDisabled} className="w-fit cursor-pointer">
+              <BookOpen size={16} className="cursor-pointer" />
+              Take quiz
+            </Button>
+          </div>
+        </div>
+      )}
     </Card>
   );
 };

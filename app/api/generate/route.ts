@@ -1,32 +1,42 @@
+import { Prisma } from "@/app/generated/prisma/client";
 import { summaryGenerate } from "@/lib/gemini/summary-generate";
+import { prisma } from "@/lib/prisma";
+
 import { NextRequest, NextResponse } from "next/server";
 
-export type Content = {
+type Content = {
+  userId: string;
   content: string;
+  title: string;
 };
 
 export async function POST(request: NextRequest) {
-  const content: Content = await request.json();
+  const { title, content, userId } = (await request.json()) as Content;
 
-  const result = await summaryGenerate(content);
+  const summary = await summaryGenerate({ title, content });
 
-  if (!result)
+  if (!summary)
     return NextResponse.json(
       {
-        message: "Content is not able to be created!",
+        message: "Summary generation failed",
       },
       { status: 500 },
     );
-  const cleaned = result
-    .replace(/```json\n?/g, "")
-    .replace(/```/g, "")
-    .trim();
-  const parsed = JSON.parse(cleaned);
+  try {
+    const article = await prisma.article.create({
+      data: {
+        content,
+        title,
+        summary,
+        userId,
+      },
+    });
 
-  return NextResponse.json({ message: cleaned });
+    return NextResponse.json({ summary: article.summary }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { message: `Internal POST error:${error}` },
+      { status: 500 },
+    );
+  }
 }
-
-// export async function GET(request: NextRequest) {
-//   const content: Content = await request.json();
-//   return NextResponse.json({ message: "" });
-// }
