@@ -1,7 +1,9 @@
 "use client";
-import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useQuizGenerator } from "@/hooks/useQuizGenerator";
+import { useSummaryArticle } from "@/hooks/useSummaryArticle";
 import {
   BookOpen,
   BookOpenCheck,
@@ -10,50 +12,24 @@ import {
   RotateCw,
   Sparkles,
 } from "lucide-react";
-import { useAuth } from "@clerk/nextjs";
 
 export const SummarizeContent = () => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [summary, setSummary] = useState<{ summary: string } | null>(null);
-  const { userId } = useAuth();
-
-  const isDisabled = loading || !title || !content;
-
-  const onGenerateSummary = async () => {
-    if (!title || !content) return;
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title,
-          content,
-          userId,
-        }),
-      });
-      if (!response) throw new Error("Failed to generate summary");
-      console.log(response, "response");
-      const data = await response.json();
-      setSummary(data);
-
-      setLoading(false);
-    } catch (error) {
-      console.log("Something went wrong during summary generation.", error);
-    }
+  const {
+    isDisabled,
+    loading,
+    summary,
+    title,
+    content,
+    onGenerateSummary,
+    onReset,
+    setTitle,
+    setContent,
+  } = useSummaryArticle();
+  const { quizzes, onGenerateQuiz } = useQuizGenerator();
+  const generateQuiz = () => {
+    if (!summary) return;
+    onGenerateQuiz(summary, title);
   };
-  const onReset = () => {
-    setContent("");
-    setTitle("");
-    setSummary(null);
-    setLoading(false);
-  };
-
   return (
     <Card className="p-8 w-full max-w-2xl flex flex-col gap-5">
       <div className="flex items-center justify-between">
@@ -145,10 +121,33 @@ export const SummarizeContent = () => {
               <Sparkles size={16} className="cursor-pointer" />
               See summary
             </Button>
-            <Button disabled={isDisabled} className="w-fit cursor-pointer">
+            <Button
+              disabled={isDisabled}
+              className="w-fit cursor-pointer"
+              onClick={generateQuiz}
+            >
               <BookOpen size={16} className="cursor-pointer" />
               Take quiz
             </Button>
+
+            {quizzes.map((quiz, i) => (
+              <div key={i}>
+                <div>{quiz.question}</div>
+                {quiz.options.map((op, index) => {
+                  return (
+                    <div className="flex items-center gap-2">
+                      <label htmlFor={`option${index}`}>{op}</label>
+                      <input
+                        type="radio"
+                        id={`option${index}`}
+                        name="choice"
+                        value={index}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
       )}

@@ -1,14 +1,21 @@
 import { Article } from "@/app/api/article/route";
 import { GoogleGenAI } from "@google/genai";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
+  throw new Error("GEMINI API KEY is not set");
+}
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 const ai = new GoogleGenAI({
   apiKey: GEMINI_API_KEY!,
 });
 
 export const articleGenerate = async (article: Article) => {
-  const prompt = `Generate 5 multiple choice questions based on this article: ${article.content}. Return the response in this exact JSON format:
+  const {
+    title,
+    summary: { summary, articleId },
+  } = article;
+  const prompt = `Generate 5 multiple choice questions based on this article: ${title} and content: ${summary}. Return the response in this exact JSON format:
       [
         {
           "question": "Question text here",
@@ -18,9 +25,14 @@ export const articleGenerate = async (article: Article) => {
       ]
       Make sure the response is valid JSON and the answer is the index (0-3) of the correct option.`;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
-  });
-  return response.text;
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash-lite",
+      contents: prompt,
+    });
+
+    return response.text;
+  } catch (error) {
+    console.log("Gemini api quiz generation failed: ", error);
+  }
 };

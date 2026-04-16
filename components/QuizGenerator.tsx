@@ -9,45 +9,17 @@ import {
   RotateCw,
   Sparkles,
 } from "lucide-react";
-type Quiz = {
-  question: string;
-  options: string[];
-  answer: string;
-};
+import { useSummaryArticle } from "@/hooks/useSummaryArticle";
+import { useQuizGenerator } from "@/hooks/useQuizGenerator";
 
 export const QuizGenerator = () => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  
-  const onGenerateQuiz = async () => {
-    if (!title && !content) return;
-    setLoading(true);
+  const { summary, title } = useSummaryArticle();
+  const { quizzes, loading, onGenerateQuiz, onReset } = useQuizGenerator();
 
-    const res = await fetch("/api/article", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title,
-        content,
-      }),
-    });
-    const data = await res.json();
-    setQuizzes(data.messge ?? []);
-
-    setLoading(false);
+  const generateQuiz = () => {
+    if (!summary) return;
+    onGenerateQuiz(summary, title);
   };
-
-  const onReset = () => {
-    setTitle("");
-    setContent("");
-    setQuizzes([]);
-    setLoading(false);
-  };
-
   return (
     <Card className="p-8 w-full max-w-2xl flex flex-col gap-5">
       <div className="flex items-center justify-between">
@@ -75,7 +47,7 @@ export const QuizGenerator = () => {
           <FileTextIcon size={16} className="text-muted-foreground" />
           Article Title
         </div>
-        <input
+        {/* <input
           id="title"
           type="text"
           className="w-full text-sm border border-zinc-200 rounded-md px-3 py-2 bg-zinc-50 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 transition-colors"
@@ -83,7 +55,7 @@ export const QuizGenerator = () => {
           value={title}
           disabled={loading}
           onChange={(e) => setTitle(e.target.value)}
-        />
+        /> */}
       </div>
 
       <div className="flex flex-col gap-2">
@@ -92,19 +64,18 @@ export const QuizGenerator = () => {
           Article Content
         </div>
         <textarea
-          id="content"
+          id="summary"
           rows={7}
           className="w-full text-sm border border-zinc-200 rounded-md px-3 py-2 bg-zinc-50 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 transition-colors resize-y"
           placeholder="Paste your article content here..."
-          value={content}
+          value={summary?.summary}
           disabled={loading}
-          onChange={(e) => setContent(e.target.value)}
         />
       </div>
 
       <Button
-        onClick={onGenerateQuiz}
-        disabled={loading || (!title && !content)}
+        onClick={generateQuiz}
+        disabled={loading || (!title && !summary)}
         className="w-full cursor-pointer"
       >
         {loading ? (
@@ -125,7 +96,22 @@ export const QuizGenerator = () => {
             <h2 className="text-sm font-medium">Quiz Questions</h2>
           </div>
           {quizzes.map((quiz, i) => (
-            <div key={i}>{quiz.options}</div>
+            <div key={i}>
+              <div>{quiz.question}</div>
+              {quiz.options.map((op, index) => {
+                return (
+                  <div className="flex items-center gap-2">
+                    <label htmlFor={`option${index}`}>{op}</label>
+                    <input
+                      type="radio"
+                      id={`option${index}`}
+                      name="choice"
+                      value={index}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           ))}
         </div>
       )}

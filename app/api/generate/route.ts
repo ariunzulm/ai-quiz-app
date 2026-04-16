@@ -1,4 +1,3 @@
-import { Prisma } from "@/app/generated/prisma/client";
 import { summaryGenerate } from "@/lib/gemini/summary-generate";
 import { prisma } from "@/lib/prisma";
 
@@ -32,7 +31,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ summary: article.summary }, { status: 200 });
+    return NextResponse.json(
+      { summary: article.summary, articleId: article.id },
+      { status: 200 },
+    );
   } catch (error) {
     return NextResponse.json(
       { message: `Internal POST error:${error}` },
