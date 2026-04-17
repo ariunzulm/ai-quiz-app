@@ -42,20 +42,8 @@ export async function POST(request: NextRequest) {
         articleId: article.summary.articleId,
       })),
     });
-    console.log(quizzes, "quizzes");
     return NextResponse.json({ quizzes: parsedQuizzes }, { status: 200 });
   } catch (error) {
     console.log("Internal POST error:", error);
   }
 }
-
-// export async function GET(request: NextRequest) {
-//   const article: Article = await request.json();
-//   return NextResponse.json({ message: "" });
-// }{
-//   question,
-//   answer,
-//   options,
-//   articleId: article.summary.articleId,
-// },
-//ehleed content, title avna - summarize hiigeed, summarized contentiig quiz bolgono

@@ -13,8 +13,7 @@ export async function POST(request: NextRequest) {
   const { title, content, userId } = (await request.json()) as Content;
 
   const summary = await summaryGenerate({ title, content });
-  console.log(summary, "summary");
-  return NextResponse.json({ message: summary });
+
   if (!summary)
     return NextResponse.json(
       {

@@ -1,4 +1,5 @@
 "use client";
+
 import { SummarizeContentType } from "@/lib/types";
 import { useAuth } from "@clerk/nextjs";
 import { useState } from "react";
