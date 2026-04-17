@@ -1,9 +1,12 @@
+"use client";
+
 import { Quiz, SummarizeContentType } from "@/lib/types";
 import { useState } from "react";
 
 export const useQuizGenerator = () => {
   const [loading, setLoading] = useState(false);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [selected, setSelected] = useState<Record<number, number>>({});
 
   const onGenerateQuiz = async (
     summary: SummarizeContentType,
@@ -11,7 +14,7 @@ export const useQuizGenerator = () => {
   ) => {
     if (!summary) return;
     setLoading(true);
-
+    setSelected({});
     const res = await fetch("/api/article", {
       method: "POST",
       headers: {
@@ -22,8 +25,7 @@ export const useQuizGenerator = () => {
         title,
       }),
     });
-    const data = await res.json()
-    ;
+    const data = await res.json();
     setQuizzes(data.quizzes ?? []);
 
     setLoading(false);
@@ -31,8 +33,9 @@ export const useQuizGenerator = () => {
 
   const onReset = () => {
     setQuizzes([]);
+    setSelected({});
     setLoading(false);
   };
 
-  return { quizzes, loading, onGenerateQuiz, onReset };
+  return { quizzes, loading, onGenerateQuiz, onReset, selected, setSelected };
 };

@@ -11,7 +11,8 @@ import {
   Loader2,
   RotateCw,
   Sparkles,
-} from "lucide-react";
+} from "lucide-react"
+import Link from "next/link";
 
 export const SummarizeContent = () => {
   const {
@@ -26,6 +27,7 @@ export const SummarizeContent = () => {
     setContent,
   } = useSummaryArticle();
   const { quizzes, onGenerateQuiz } = useQuizGenerator();
+
   const generateQuiz = () => {
     if (!summary) return;
     onGenerateQuiz(summary, title);
@@ -121,33 +123,16 @@ export const SummarizeContent = () => {
               <Sparkles size={16} className="cursor-pointer" />
               See summary
             </Button>
-            <Button
-              disabled={isDisabled}
-              className="w-fit cursor-pointer"
-              onClick={generateQuiz}
-            >
-              <BookOpen size={16} className="cursor-pointer" />
-              Take quiz
-            </Button>
-
-            {quizzes.map((quiz, i) => (
-              <div key={i}>
-                <div>{quiz.question}</div>
-                {quiz.options.map((op, index) => {
-                  return (
-                    <div className="flex items-center gap-2">
-                      <label htmlFor={`option${index}`}>{op}</label>
-                      <input
-                        type="radio"
-                        id={`option${index}`}
-                        name="choice"
-                        value={index}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
+            <Link href={`/${summary.articleId}`}>
+              <Button
+                disabled={isDisabled}
+                className="w-fit cursor-pointer"
+                onClick={generateQuiz}
+              >
+                <BookOpen size={16} className="cursor-pointer" />
+                Take quiz
+              </Button>
+            </Link>
           </div>
         </div>
       )}

@@ -1,7 +1,6 @@
 import { articleGenerate } from "@/lib/gemini/article-generate";
 import { prisma } from "@/lib/prisma";
-import { SummarizeContentType } from "@/lib/types";
-import { create } from "domain";
+import {  SummarizeContentType } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export type Article = {
@@ -17,7 +16,6 @@ type QuizProps = {
 
 export async function POST(request: NextRequest) {
   const article: Article = await request.json();
-  console.log(article);
 
   const quizzes = await articleGenerate(article);
   if (!quizzes)
@@ -33,28 +31,31 @@ export async function POST(request: NextRequest) {
     .replace(/```/g, "")
     .trim();
 
-  const parsedQuizzes = JSON.parse(cleaned);
-  console.log(parsedQuizzes);
-  return NextResponse.json({ quizzes: quizzes }, { status: 200 });
-  const { question, answer, options }: QuizProps = parsedQuizzes;
-  try {
-    const quizzes = await prisma.quiz.create({
-      data: {
-        question,
-        answer,
-        options,
-        articleId: article.summary.articleId,
-      },
-    });
+  const parsedQuizzes: QuizProps[] = JSON.parse(cleaned);
 
+  try {
+    const quizzes = await prisma.quiz.createMany({
+      data: parsedQuizzes.map((quiz) => ({
+        question: quiz.question,
+        answer: quiz.answer,
+        options: quiz.options,
+        articleId: article.summary.articleId,
+      }))
+    });
+    console.log(quizzes, "quizzes");
     return NextResponse.json({ quizzes: quizzes }, { status: 200 });
   } catch (error) {
     console.log("Internal POST error:", error);
   }
 }
 
-export async function GET(request: NextRequest) {
-  const article: Article = await request.json();
-  return NextResponse.json({ message: "" });
-}
+// export async function GET(request: NextRequest) {
+//   const article: Article = await request.json();
+//   return NextResponse.json({ message: "" });
+// }{
+//   question,
+//   answer,
+//   options,
+//   articleId: article.summary.articleId,
+// },
 //ehleed content, title avna - summarize hiigeed, summarized contentiig quiz bolgono
