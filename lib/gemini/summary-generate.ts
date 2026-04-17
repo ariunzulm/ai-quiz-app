@@ -20,7 +20,6 @@ export const summaryGenerate = async ({ title, content }: SummaryProps) => {
       model: "gemini-2.5-flash-lite",
       contents: prompt,
     });
-
     return response.text ?? null;
   } catch (error) {
     console.log("Gemini api generation failed: ", error);

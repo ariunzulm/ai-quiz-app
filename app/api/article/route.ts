@@ -1,6 +1,6 @@
 import { articleGenerate } from "@/lib/gemini/article-generate";
 import { prisma } from "@/lib/prisma";
-import {  SummarizeContentType } from "@/lib/types";
+import { SummarizeContentType } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export type Article = {
@@ -34,16 +34,16 @@ export async function POST(request: NextRequest) {
   const parsedQuizzes: QuizProps[] = JSON.parse(cleaned);
 
   try {
-    const quizzes = await prisma.quiz.createMany({
+    await prisma.quiz.createMany({
       data: parsedQuizzes.map((quiz) => ({
         question: quiz.question,
         answer: quiz.answer,
         options: quiz.options,
         articleId: article.summary.articleId,
-      }))
+      })),
     });
     console.log(quizzes, "quizzes");
-    return NextResponse.json({ quizzes: quizzes }, { status: 200 });
+    return NextResponse.json({ quizzes: parsedQuizzes }, { status: 200 });
   } catch (error) {
     console.log("Internal POST error:", error);
   }
