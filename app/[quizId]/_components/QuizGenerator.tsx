@@ -47,10 +47,22 @@ const QuizGenerator = ({
   const score = pageQuizzes.filter(
     (quiz, i) => selected[i] === parseInt(quiz.answer),
   ).length;
-
+  if (!pageQuizzes || pageQuizzes.length === 0) {
+    return (
+      <Card className="p-8 w-full max-w-2xl flex flex-col gap-5">
+        <div className="flex items-center gap-2 text-2xl font-medium">
+          <Sparkles size={20} className="text-muted-foreground" />
+          {pageTitle}
+        </div>
+        <p className="text-sm text-muted-foreground">
+          No quizzes available for this article yet.
+        </p>
+      </Card>
+    );
+  }
   if (showResults) {
     return (
-      <Card className="p-8 w-full flex flex-col gap-6">
+      <Card className="p-8 w-full max-w-2xl flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-2xl font-medium">
             <Trophy size={20} className="text-muted-foreground" />
@@ -174,7 +186,7 @@ const QuizGenerator = ({
             if (!hasAnswered) {
               optionStyle +=
                 "border-zinc-200 hover:bg-zinc-100 bg-white cursor-pointer";
-            } else if (isCorrect) {
+            } else if (isCorrect && isSelected) {
               optionStyle += "border-green-300 bg-green-50 text-green-800";
             } else if (isSelected) {
               optionStyle += "border-red-300 bg-red-50 text-red-800";
@@ -202,7 +214,7 @@ const QuizGenerator = ({
           variant="outline"
           onClick={() => setCurrentIndex((i) => i - 1)}
           disabled={currentIndex === 0}
-          className="w-full"
+          className="w-fit"
         >
           <ChevronLeft size={16} />
           Previous
@@ -221,7 +233,7 @@ const QuizGenerator = ({
           <Button
             onClick={() => setCurrentIndex((i) => i + 1)}
             disabled={!hasAnswered}
-            className="w-full"
+            className="w-fit"
           >
             Next
             <ChevronRight size={16} />

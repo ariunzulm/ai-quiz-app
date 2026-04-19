@@ -11,8 +11,10 @@ import {
   Loader2,
   RotateCw,
   Sparkles,
-} from "lucide-react"
-import Link from "next/link";
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+
+
 
 export const SummarizeContent = () => {
   const {
@@ -28,9 +30,12 @@ export const SummarizeContent = () => {
   } = useSummaryArticle();
   const { quizzes, onGenerateQuiz } = useQuizGenerator();
 
-  const generateQuiz = () => {
+  const router = useRouter();
+
+  const generateQuiz = async () => {
     if (!summary) return;
-    onGenerateQuiz(summary, title);
+    await onGenerateQuiz(summary, title);
+    router.push(`/${summary.articleId}`);
   };
   return (
     <Card className="p-8 w-full max-w-2xl flex flex-col gap-5">
@@ -123,16 +128,15 @@ export const SummarizeContent = () => {
               <Sparkles size={16} className="cursor-pointer" />
               See summary
             </Button>
-            <Link href={`/${summary.articleId}`}>
-              <Button
-                disabled={isDisabled}
-                className="w-fit cursor-pointer"
-                onClick={generateQuiz}
-              >
-                <BookOpen size={16} className="cursor-pointer" />
-                Take quiz
-              </Button>
-            </Link>
+
+            <Button
+              disabled={isDisabled}
+              className="w-fit cursor-pointer"
+              onClick={generateQuiz}
+            >
+              <BookOpen size={16} className="cursor-pointer" />
+              Take quiz
+            </Button>
           </div>
         </div>
       )}

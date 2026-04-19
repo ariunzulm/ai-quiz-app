@@ -15,7 +15,7 @@ export default async function QuizPage({
   if (!article) return <div>Article not found</div>;
 
   return (
-    <div className="w-full">
+    <div className="p-8 w-full max-w-2xl flex flex-col gap-5">
       <QuizGenerator
         pageQuizzes={article.quizzes}
         pageSummary={article.summary}
