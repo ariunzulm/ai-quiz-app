@@ -13,6 +13,11 @@ import { prisma } from "@/lib/prisma";
 import { FileText, PlusCircle } from "lucide-react";
 import Link from "next/link";
 
+type ArticleProps = {
+  id: number;
+  title: string;
+};
+
 export async function AppSidebar() {
   const articles = await prisma.article.findMany({
     orderBy: { createdAt: "desc" },
@@ -60,7 +65,7 @@ export async function AppSidebar() {
               Recent
             </SidebarGroupLabel>
             <SidebarMenu>
-              {articles.map((article) => (
+              {articles.map((article: ArticleProps) => (
                 <SidebarMenuItem key={article.id}>
                   <Link
                     href={`/${article.id}`}

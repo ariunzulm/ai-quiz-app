@@ -12,6 +12,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
+import { React } from "next/dist/server/route-modules/app-page/vendored/rsc/entrypoints";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
