@@ -65,7 +65,7 @@ export async function AppSidebar() {
               Recent
             </SidebarGroupLabel>
             <SidebarMenu>
-              {articles.map((article: ArticleProps) => (
+              {articles.map((article) => (
                 <SidebarMenuItem key={article.id}>
                   <Link
                     href={`/${article.id}`}
